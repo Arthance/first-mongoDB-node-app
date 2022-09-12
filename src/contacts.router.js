@@ -1,9 +1,17 @@
 import express from "express";
+import Contact from "./contact.model.js";
 
 const contactsRouter = express.Router();
 
-contactsRouter.get("/", async (req, res) => {});
-contactsRouter.post("/", async (req, res) => {});
+contactsRouter.get("/", async (_, res) => {
+  const contacts = await Contact.find();
+  return res.send(contacts);
+});
+contactsRouter.post("/", async (req, res) => {
+  const contact = new Contact(req.body);
+  await contact.save();
+  return res.send(contact);
+});
 contactsRouter.get("/:ids", async (req, res) => {});
 contactsRouter.patch("/:id", async (req, res) => {});
 contactsRouter.delete("/:id", async (req, res) => {});
