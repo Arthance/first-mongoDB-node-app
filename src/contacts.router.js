@@ -1,6 +1,7 @@
 import express from "express";
 // import { Types } from "mongoose";
 import mongoose from "mongoose";
+import auth from "./auth.js";
 import Contact from "./contact.model.js";
 
 const contactsRouter = express.Router();
@@ -8,14 +9,15 @@ const contactsRouter = express.Router();
 // GET ALL
 contactsRouter.get("/", async (_, res) => {
   // POUR AFFINER LE RÉSULTAT => .select()
-  const contacts = await Contact.find().select("name phone email");
+  const contacts = await Contact.find().select("name phone email owner");
   // const contacts = await Contact.find();
   return res.send(contacts);
 });
 
 // CREATE
-contactsRouter.post("/", async (req, res) => {
+contactsRouter.post("/", auth, async (req, res) => {
   const contact = new Contact(req.body);
+  contact.owner = req.user._id;
   await contact.save();
   return res.send(contact);
 });
@@ -35,7 +37,7 @@ contactsRouter.get("/:id", async (req, res) => {
 });
 
 // UPDATE
-contactsRouter.patch("/:id", async (req, res) => {
+contactsRouter.patch("/:id", auth, async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.sendStatus(404);
   }
@@ -63,7 +65,7 @@ contactsRouter.patch("/:id", async (req, res) => {
   await contact.save();
   return res.send(contact);
 });
-contactsRouter.delete("/:id", async (req, res) => {
+contactsRouter.delete("/:id", auth, async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.sendStatus(404);
   }
