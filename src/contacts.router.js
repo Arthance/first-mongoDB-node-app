@@ -48,12 +48,20 @@ contactsRouter.patch("/:id", async (req, res) => {
       .status(404)
       .send(`Le contact avec l'id ${req.params.id} n'existe pas.`);
   }
-  const updatedContact = await Contact.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
-  return res.send(updatedContact);
+  // Avec cette approche pas besoin de findById avant
+  // const updatedContact = await Contact.findByIdAndUpdate(
+  //   req.params.id,
+  //   req.body,
+  //   { new: true }
+  // );
+  // return res.send(updatedContact);
+
+  // En réutilisant le résultat de findById
+  for (let attr in req.body) {
+    contact[attr] = req.body[attr];
+  }
+  await contact.save();
+  return res.send(contact);
 });
 contactsRouter.delete("/:id", async (req, res) => {});
 
