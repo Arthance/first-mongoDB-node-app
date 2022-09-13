@@ -1,6 +1,6 @@
 import express from "express";
 // import { Types } from "mongoose";
-import Types from "mongoose";
+import mongoose from "mongoose";
 import Contact from "./contact.model.js";
 
 const contactsRouter = express.Router();
@@ -22,7 +22,7 @@ contactsRouter.post("/", async (req, res) => {
 
 // GET BY ID
 contactsRouter.get("/:id", async (req, res) => {
-  if (!Types.isValidObjectId(req.params.id)) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
     return res.sendStatus(404);
   }
   const contact = await Contact.findById(req.params.id);
@@ -36,7 +36,7 @@ contactsRouter.get("/:id", async (req, res) => {
 
 // UPDATE
 contactsRouter.patch("/:id", async (req, res) => {
-  if (!Types.isValidObjectId(req.params.id)) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
     return res.sendStatus(404);
   }
   // if (!Types.ObjectId.isValid(req.params.id)) {
@@ -63,6 +63,19 @@ contactsRouter.patch("/:id", async (req, res) => {
   await contact.save();
   return res.send(contact);
 });
-contactsRouter.delete("/:id", async (req, res) => {});
+contactsRouter.delete("/:id", async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.sendStatus(404);
+  }
+  const contact = await Contact.findById(req.params.id);
+  if (!contact) {
+    return res
+      .status(404)
+      .send(`Le contact avec l'id ${req.params.id} n'existe pas.`);
+  }
+  // _id => clé id dans mongoDB
+  await Contact.deleteOne({ _id: req.params.id });
+  return res.send("Contact supprimé avec succès !");
+});
 
 export default contactsRouter;
